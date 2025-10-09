@@ -1,0 +1,129 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: #1a1a1a;
+}
+
+.container {
+  display: flex;
+  background: #3B82F6;
+  border-radius: 10px;
+  overflow: hidden;
+  width: 700px;
+  max-width: 95%;
+}
+
+.form-box {
+  background: #fff;
+  padding: 40px 30px;
+  flex: 1;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.form-box h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.form-box h2::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 3px;
+  background: #3B82F6;
+  margin-top: 5px;
+}
+
+.alert {
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.alert.success {
+  background: #DCFCE7;
+  color: #15803D;
+  border: 1px solid #86EFAC;
+}
+
+.alert.error {
+  background: #FEE2E2;
+  color: #B91C1C;
+  border: 1px solid #FCA5A5;
+}
+
+.form-box input[type="text"],
+.form-box input[type="email"],
+.form-box input[type="password"] {
+  display: block;
+  width: 80%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+  outline: none;
+}
+
+.terms {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  font-size: 13px;
+  color: #555;
+}
+
+.terms input {
+  margin-right: 8px;
+}
+
+.btn {
+  background: #3461a8;
+  color: #fff;
+  border: none;
+  padding: 12px;
+  border-radius: 5px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn:hover {
+  background: #2563EB;
+}
+
+.login-link {
+  margin-top: 15px;
+  font-size: 13px;
+  text-align: center;
+}
+
+.login-link a {
+  color: #3B82F6;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+/* .side-text {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 28px;
+  font-weight: 700;
+  text-align: center;
+  padding: 20px;
+}  */
