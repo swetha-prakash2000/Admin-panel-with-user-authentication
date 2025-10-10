@@ -94,11 +94,72 @@ async function Dashboard(req,res) {
 ////forgot password
 
 
+async function forgotPassword(req,res) {
+  const {email} = req.body
+   
+  try {
+    
+          const user = await User.findOne({email})
+          if(!user){
+            return res.render('user/forgotpassword',{success : null, error : 'User not found'})
+          }
+
+            const otp = Math.floor(100000 + Math.random() * 900000)
+            console.log(otp);
+            const expiresAt = new Date(Date.now()+5*60*10000)
+
+            user.resetOtp = otp
+            user.otpExpires = expiresAt
+            await user.save()
+
+       const transport = nodemailer.createTransport({
+               
+               service : "gamil",
+               secure : true,
+               auth : {
+                user : process.env.MY_GMAIL,
+                pass : process.env.MY_PASSWORD
+               }
+
+       })
+      
+     await transport.sendMail({
+        from : `"My App"<${process.env.SMPT_USER}>`,
+        to : email,
+        subject : "Your otp to reset password",
+        html : `<p> Your otp is <b>${otp}</b>.It expires in 5mins.</p>`
+
+     })
+     res.render('user/enterOtp',{email,message : 'Otp send to your mail'})
+
+     const showOtpForm = (req,res)=>{
+      res.render('user/enterOtp',{email : req.query.email})
+     }
+       
+           
+      
+            
+
+
+          
 
 
 
 
 
+
+
+
+
+
+
+
+  } catch (error) {
+    
+  }
+
+
+}
 
 
 
@@ -110,5 +171,6 @@ async function Dashboard(req,res) {
 
 module.exports = { postSignup,
                    postLogin,
-                   Dashboard
+                   Dashboard,
+                   forgotPassword,
  };

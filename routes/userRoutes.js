@@ -24,18 +24,30 @@ router.post('/login',userController.postLogin);
 }); 
 
 
+///forgot password
+
+ router.get('/forgotPassword',(req,res)=>{
+  res.render('forgotPassword',{success : null, error : null});
+})
+
+router.post('/forgotPassword',userController.forgotPassword)
 
 
 
+///verify
+router.get('/verify',(req,res)=>{
+  res.render('verify',{success : null, error : null});
+
+})
 
 
 
+////reset password
 
+router.get('/resetpassword',(req,res)=>{
+  res.render('resetpassword',{success : null, error : null});
 
-
-
-
-
+})
 
 
 

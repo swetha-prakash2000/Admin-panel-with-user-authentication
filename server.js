@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 require("dotenv").config();
 const path = require("path");
 const cookieParser = require("cookie-parser");
-
+const nodemailer = require('nodemailer');
 const PORT = process.env.PORT || 3000;
 
 const app = express();
