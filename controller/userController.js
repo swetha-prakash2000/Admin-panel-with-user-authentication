@@ -1,6 +1,10 @@
+
+require('dotenv').config();
 const User = require('../models/user');
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer")
+
 
 //signup
 async function postSignup(req, res) {
@@ -94,72 +98,139 @@ async function Dashboard(req,res) {
 ////forgot password
 
 
-async function forgotPassword(req,res) {
-  const {email} = req.body
+async function forgotPassword(req, res) {
+  const { email } = req.body;
+
+  try {
+    console.log("EMAIL_USER:", process.env.EMAIL_USER);
+    console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "Loaded" : "Missing");
+
+    
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.render("user/forgotpassword", {
+        success: null,
+        error: "User not found",
+      });
+    }
+
+    
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    console.log("Generated OTP:", otp);
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); 
+
+    user.resetOtp = otp;
+    user.otpExpires = expiresAt;
+    await user.save();
+
+    
+    const transporter = nodemailer.createTransport({
+      service: "gmail", 
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
    
+    
+    await transporter.sendMail({
+      from: `"My App" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "Your OTP to reset password",
+      html: `<p>Your OTP is <b>${otp}</b>. It expires in 5 minutes.</p>`,
+    });
+
+    
+    res.render("verify", {
+      email,
+      success : null,
+      error : null,
+      message: "OTP sent to your email successfully",
+    });
+  } catch (error) {
+    console.error(" Error forgot password:", error.message,error.stack);
+    res.render("verify", { success: null, error: "Failed to send OTP. Try again later." });
+  }
+}
+
+
+/////verify otp
+
+
+
+async function verify(req, res) {
+  const { email, digit1, digit2, digit3, digit4, digit5, digit6 } = req.body;
+
+  
+  const otpJoin = `${digit1}${digit2}${digit3}${digit4}${digit5}${digit6}`;
+
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user || Number(otpJoin) !== user.resetOtp || user.otpExpires < new Date()) {
+      return res.render("resetPassword", {
+        success: null,
+        error: "Invalid OTP or email",
+      });
+    }
+
+    console.log('Rendering resetPassword with:', {
+      email: user.email,
+      userId: user._id
+    });
+
+    return res.render("verify", { 
+      email: user.email, 
+      userId: user._id, 
+      success: "OTP verified, you can reset your password now!", 
+      error: null 
+    });
+  } catch (error) {
+    console.error("Error from verifyOtp:", error.message, error.stack);
+    return res.render("verfiy", { 
+      success: null, 
+      error: "Something went wrong" 
+    });
+  }
+}
+
+
+async function resetPassword(req,res) {
+
+  const { id, email, password, confirmPassword } = req.body
+
   try {
     
-          const user = await User.findOne({email})
-          if(!user){
-            return res.render('user/forgotpassword',{success : null, error : 'User not found'})
-          }
+       if(password!==confirmPassword){
+        console.log('hey');
+        return res.render('resetPassword',{email,userId:id,message:'Password do not match'})
+       }
 
-            const otp = Math.floor(100000 + Math.random() * 900000)
-            console.log(otp);
-            const expiresAt = new Date(Date.now()+5*60*10000)
+       const hashedPassword = await bcrypt.hash(password,10)
+       const user = await User.findByIdAndUpdate(id,{password:hashedPassword},{new:true})
 
-            user.resetOtp = otp
-            user.otpExpires = expiresAt
-            await user.save()
+       if(!user){
+              console.log('hey2');
 
-       const transport = nodemailer.createTransport({
-               
-               service : "gamil",
-               secure : true,
-               auth : {
-                user : process.env.MY_GMAIL,
-                pass : process.env.MY_PASSWORD
-               }
 
-       })
+        return res.render('resetPassword',{email,userId:id,message:'User not found'})
+       }
       
-     await transport.sendMail({
-        from : `"My App"<${process.env.SMPT_USER}>`,
-        to : email,
-        subject : "Your otp to reset password",
-        html : `<p> Your otp is <b>${otp}</b>.It expires in 5mins.</p>`
+        console.log('Password updated for ' ,user.email)
 
-     })
-     res.render('user/enterOtp',{email,message : 'Otp send to your mail'})
-
-     const showOtpForm = (req,res)=>{
-      res.render('user/enterOtp',{email : req.query.email})
-     }
-       
-           
-      
-            
-
-
-          
-
-
-
-
-
-
-
-
-
-
-
+        return res.render('/login',email,{success:'Password reset successfully', error : null})
 
   } catch (error) {
-    
+    console.error('Error during reset password',error.message,error.stack)
+        console.log('hey3');
+
+     res.render('resetPassword',{email,userId:id,message:'Somthing went wrong',error : null})
   }
-
-
+  
 }
+
+
 
 
 
@@ -173,4 +244,7 @@ module.exports = { postSignup,
                    postLogin,
                    Dashboard,
                    forgotPassword,
+                   verify,
+                   resetPassword,
+
  };

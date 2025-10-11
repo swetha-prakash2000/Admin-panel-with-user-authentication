@@ -32,23 +32,23 @@ router.post('/login',userController.postLogin);
 
 router.post('/forgotPassword',userController.forgotPassword)
 
+////verify
 
+router.get('/verify', (req, res) => {
+  res.render('verify', { success: null, error: null });
+});
 
-///verify
-router.get('/verify',(req,res)=>{
-  res.render('verify',{success : null, error : null});
-
-})
-
+router.post('/verify', userController.verify);
 
 
 ////reset password
 
-router.get('/resetpassword',(req,res)=>{
-  res.render('resetpassword',{success : null, error : null});
-
+router.get('/resetPassword',(req,res)=>{
+  res.render('resetPassword',{success : null, error : null});
+  
 })
 
+router.post('/resetPassword',userController.resetPassword)
 
 
 
