@@ -20,6 +20,11 @@ app.use(express.static(path.join(__dirname, "public")));
 const userRoutes = require('./routes/userRoutes');
 app.use('/', userRoutes);
 
+const adminRoutes = require('./routes/adminRoutes');
+app.use('/', adminRoutes);
+
+
+
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.log(err));

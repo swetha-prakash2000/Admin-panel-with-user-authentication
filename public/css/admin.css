@@ -1,0 +1,105 @@
+
+/* General page styling */
+body {
+  background-color: #f8f9fa;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Card container */
+.card {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+/* Table styling */
+.table th,
+.table td {
+  vertical-align: middle;
+  text-align: center;
+}
+
+.table-hover tbody tr:hover {
+  background-color: #f1f1f1;
+}
+
+/* Button styles */
+.btn-add {
+  margin-left: auto;
+  font-weight: bold;
+}
+
+.btn-update,
+.btn-delete,
+.btn-block,
+.btn-unblock {
+  margin: 0 4px;
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  border-radius: 4px;
+  color: #fff;
+  border: none;
+}
+
+.btn-update {
+  background-color: #0d6efd;
+}
+
+.btn-delete {
+  background-color: #dc3545;
+}
+
+.btn-block {
+  background-color: #ffc107;
+  color: #000;
+}
+
+.btn-unblock {
+  background-color: #198754;
+}
+
+/* Modal styling */
+.modal-content {
+  border-radius: 6px;
+}
+
+.modal-header {
+  background-color: #f0f0f0;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.modal-title {
+  font-weight: 600;
+}
+
+.modal-footer button {
+  min-width: 100px;
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  .btn-add {
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .table th,
+  .table td {
+    font-size: 0.85rem;
+  }
+}
+
+.logout-admin {
+  background: linear-gradient(90deg, #8e2de2, #4a00e0);
+  color: white;
+  padding: 12px 30px;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: 8px;
+  transition: transform 0.2s ease;
+  cursor: pointer;
+}
+
+.logout-admin:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 10px rgba(138, 43, 226, 0.4);
+}

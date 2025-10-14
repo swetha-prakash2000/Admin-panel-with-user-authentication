@@ -10,11 +10,13 @@ router.get('/signup', (req, res) => {
 router.post('/signup', userController.postSignup);
 
 
-//login page
-router.get('/login',(req,res)=>{
+//* /login page
+ router.get('/login',(req,res)=>{
   res.render('login',{success : null,error : null});
 })
 router.post('/login',userController.postLogin);
+
+
 
 
 ///dashboard
@@ -49,8 +51,7 @@ router.get('/resetPassword',(req,res)=>{
 })
 
 router.post('/resetPassword',userController.resetPassword)
-
-
+ 
 
 
 

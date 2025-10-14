@@ -97,7 +97,6 @@ async function Dashboard(req,res) {
 
 ////forgot password
 
-
 async function forgotPassword(req, res) {
   const { email } = req.body;
 
@@ -158,8 +157,8 @@ async function forgotPassword(req, res) {
 /////verify otp
 
 
-
-async function verify(req, res) {
+ 
+/* async function verify(req, res) {
   const { email, digit1, digit2, digit3, digit4, digit5, digit6 } = req.body;
 
   
@@ -179,13 +178,15 @@ async function verify(req, res) {
       email: user.email,
       userId: user._id
     });
+    return res.render("resetPassword", { 
+  userId: user._id, 
+  email: user.email, 
+  success: "OTP verified successfully. You can now reset your password." 
+});
 
-    return res.render("verify", { 
-      email: user.email, 
-      userId: user._id, 
-      success: "OTP verified, you can reset your password now!", 
-      error: null 
-    });
+    return res.render('resetPassword', { success: null, error: null });
+
+
   } catch (error) {
     console.error("Error from verifyOtp:", error.message, error.stack);
     return res.render("verfiy", { 
@@ -193,46 +194,109 @@ async function verify(req, res) {
       error: "Something went wrong" 
     });
   }
+} 
+ */
+
+
+async function verify(req, res) {
+  const { email, digit1, digit2, digit3, digit4, digit5, digit6 } = req.body;
+  const otpJoin = `${digit1}${digit2}${digit3}${digit4}${digit5}${digit6}`;
+
+  try {
+    const user = await User.findOne({ email });
+
+    
+    if (!user || Number(otpJoin) !== user.resetOtp || user.otpExpires < new Date()) {
+      return res.render("resetPassword", {
+        email,            
+        userId: null,     
+        success: null,
+        error: "Invalid OTP or email"
+      });
+    }
+
+    
+    console.log('Rendering resetPassword with:', {
+      email: user.email,
+      userId: user._id
+    });
+
+    return res.render("resetPassword", { 
+      userId: user._id,
+      email: user.email,
+      success: "OTP verified successfully. You can now reset your password.",
+      error: null,
+      message: null
+    });
+
+  } catch (error) {
+    console.error("Error from verifyOtp:", error.message, error.stack);
+    return res.render("verify", {   
+      success: null,
+      error : null
+      //error: "Something went wrong"
+    });
+  }
 }
 
 
-async function resetPassword(req,res) {
+////////reset password
 
-  const { id, email, password, confirmPassword } = req.body
+  
+async function resetPassword(req, res) {
+
+
+ const { id, email, password, confirmPassword } = req.body;
+  console.log('req body =', req.body);
 
   try {
     
-       if(password!==confirmPassword){
-        console.log('hey');
-        return res.render('resetPassword',{email,userId:id,message:'Password do not match'})
-       }
+    if (password !== confirmPassword) {
+      return res.render('resetPassword', {
+        email,
+        userId: id, 
+        message: 'Passwords do not match',
+        success: null,
+        error: null
+      });
+    }
 
-       const hashedPassword = await bcrypt.hash(password,10)
-       const user = await User.findByIdAndUpdate(id,{password:hashedPassword},{new:true})
-
-       if(!user){
-              console.log('hey2');
+    
+    const hashedPassword = await bcrypt.hash(password, 10);
 
 
-        return res.render('resetPassword',{email,userId:id,message:'User not found'})
-       }
-      
-        console.log('Password updated for ' ,user.email)
+      const user = await User.findByIdAndUpdate(id, { password: hashedPassword }, { new: true });
 
-        return res.render('/login',email,{success:'Password reset successfully', error : null})
+    if (!user) {
+      return res.render('resetPassword', {
+        email,
+        userId: id,
+        message: 'User not found',
+        success: null,
+        error: null
+      });
+    }
+
+    console.log('Password updated for', user.email);
+
+    
+    return res.redirect('/login');
 
   } catch (error) {
-    console.error('Error during reset password',error.message,error.stack)
-        console.log('hey3');
+    console.error('Error during reset password:', error.message, error.stack);
 
-     res.render('resetPassword',{email,userId:id,message:'Somthing went wrong',error : null})
+    
+    return res.render('resetPassword', {
+      email,
+      userId: id,
+      message: 'Something went wrong. Please try again.',
+      success: null,
+      error: null
+    });
   }
-  
 }
 
-
-
-
+ 
 
 
 
@@ -247,4 +311,4 @@ module.exports = { postSignup,
                    verify,
                    resetPassword,
 
- };
+ }
