@@ -54,8 +54,15 @@ router.post('/resetPassword',userController.resetPassword)
  
 
 
+////logout
 
 
+
+router.get('/logout',(req,res)=>{
+  res.render('postLogin',{success : null, error : null});
+  
+})
+router.post('/logout',userController.postLogin)
 
 
 

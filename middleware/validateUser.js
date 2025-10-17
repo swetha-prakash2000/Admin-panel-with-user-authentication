@@ -5,6 +5,7 @@ const signupValidator = [
     body('name').isLength({min:3}),
     body('email').isEmail(),
     body('password').isLength({min:4}),
+    body('confirmPassword').isLength({min:4}),
 
 
     async(req,res,next)=>{

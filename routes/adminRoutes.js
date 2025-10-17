@@ -1,7 +1,8 @@
 
 const express = require('express');
 const router = express.Router();
-const { adminLogin, adminDashboard } = require('../controller/adminController');
+const { adminLogin, adminDashboard, blockUser } = require('../controller/adminController');
+const { updateUser,addUser,deleteUser,logoutAdmin} = require('../controller/adminController')
 const { route } = require('./userRoutes');
 
 
@@ -14,21 +15,35 @@ router.get('/adminlogin', (req, res) => {
 router.post('/adminlogin', adminLogin);
 
 ///////admin dashboard
- router.get('/adminDashboard', (req, res) => {
+/*  router.get('/adminDashboard', (req, res) => {
   res.render('adminDashboard', { success: null, users: [], error:null });
-});
- router.post('/adminDashboard',adminDashboard);
+}); */
+ router.get('/adminDashboard',adminDashboard);
+
+
+////////add user
+
+router.post('/add-user', addUser)
+
+
+//////////update user
+
+router.post('/update-user',updateUser)
+
+
+///////////delete user
+
+router.post('/delete-user',deleteUser)
+
+//////////block user
+
+router.post('/block-user/:id',blockUser)
 
 
 
-
-
-
-
-
-
-
-
+ router.get('/logoutAdmin', (req, res) => {
+   res.render('adminLogin', { success: null, error: null })
+ })
 
 
 
