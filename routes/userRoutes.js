@@ -1,29 +1,34 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../controller/userController');
+const {protectedAuth} = require('../middleware/auth');
+const { signupValidator, loginValidator } = require('../middleware/validateUser');
+// const user = require('../models/user');
 
 // Signup page
 router.get('/signup', (req, res) => {
   res.render('signup', { success: null, error: null });
 });
 
-router.post('/signup', userController.postSignup);
+router.post('/signup', signupValidator,userController.postSignup);
 
 
 //* /login page
  router.get('/login',(req,res)=>{
+  
   res.render('login',{success : null,error : null});
 })
-router.post('/login',userController.postLogin);
-
+router.post('/login',loginValidator,userController.postLogin);
 
 
 
 ///dashboard
 
- router.get('/dashboard', (req, res) => {
-  res.render('dashboard', { user: req.user || null });
-}); 
+
+router.get('/dashboard', protectedAuth, (req, res) => {
+  res.render('dashboard', { user: req.user });
+});
+
 
 
 ///forgot password
@@ -62,24 +67,9 @@ router.get('/logout',(req,res)=>{
   res.render('postLogin',{success : null, error : null});
   
 })
-router.post('/logout',userController.postLogin)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+router.post('/logout',userController.logout)
 
 
 module.exports = router;
+
+

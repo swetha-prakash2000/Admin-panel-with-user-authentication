@@ -2,7 +2,7 @@
 const adminModel = require('../models/admin');
 const User = require('../models/user');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+ const bcrypt = require('bcrypt');
 
 async function adminLogin(req, res) {
   const { email, password } = req.body;
@@ -24,8 +24,6 @@ async function adminLogin(req, res) {
       { expiresIn: '1d' }
     );
 
-
-  
 
  
 res.cookie('token', token, { httpOnly: true });

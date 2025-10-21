@@ -45,12 +45,13 @@ async function postSignup(req, res) {
 
 async function postLogin(req,res) {
   try {
+    console.log('login worked in controller')
     const{email,password} = req.body;
    
    
     const user = await User.findOne({email});
    if(!user){
-    return res.render('login',{success : null, error : 'User doaes not exist'})
+    return res.render('login',{success : null, error : 'User does not exist'})
    }
    if(user.isBlock){
     return res.render('login',{success : null, error : 'You are blocked by admiin'})
@@ -70,10 +71,12 @@ async function postLogin(req,res) {
    })
 
    res.render('dashboard',{user: user,success : null, error : null})
+    // res.redirect('/dashboard');
     
 
   } catch (error) {
     console.log('error from postLogin',error.message,error.stack);
+   
     
     return res.render('login',{success : null, error :'Error during login'})
   }
@@ -85,11 +88,12 @@ async function postLogin(req,res) {
 async function Dashboard(req,res) {
   const user = await User.findById(req.auth._id)
 
-  console.log('function from dashboard', user);
   
   if(!user){
-    return res.render('login',{success : null, error : 'User not found'})
+    return res.redirect('/login')
+   
   }
+
   return res.render('dashboard',{user, success : null, error : null})
 }
 
@@ -159,7 +163,7 @@ async function forgotPassword(req, res) {
 
 async function verify(req, res) {
   const { email, digit1, digit2, digit3, digit4, digit5, digit6 ,} = req.body;
-  console.log('verify - req.body = ', req.body);
+  // console.log('verify - req.body = ', req.body);
   
   const otpJoin = `${digit1}${digit2}${digit3}${digit4}${digit5}${digit6}`;
 
@@ -177,11 +181,6 @@ async function verify(req, res) {
     }
 
     
-    // console.log('Rendering resetPassword with:', {
-    //   email: user.email,
-    //   userId: user._id
-    // });
-
     return res.render("resetPassword", { 
       userId: user._id,
       email: user.email,
@@ -266,9 +265,9 @@ console.log(' restPassword - req body =', req.body);
 
 ///////user logout
 
- const logout = (req,res)=>{
-  res.clearCookie('token')
-  res.redirect('/postLogin')
+ const logout =async (req,res)=>{
+  await res.clearCookie('token')
+  res.redirect('/login')
   
 }
 
