@@ -1,54 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Login</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/css/login.css">
+  <meta charset="UTF-8">
+  <title>Login | Admin Panel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/login.css">
+  <style>
+    /* Optional: for consistent look with signup page */
+    .message { padding: 10px; margin-bottom: 12px; border-radius: 4px; font-size: 0.95rem; }
+    .message.success { background:#e6ffed; color:#216e3a; border:1px solid #b7f0c6; }
+    .message.error { background:#ffecec; color:#7a1a1a; border:1px solid #f0c6c6; }
+    .error-text { display:none; color:#b00020; font-size:0.9rem; margin-top:6px; }
+    .form-group { margin-bottom: 15px; }
+  </style>
 </head>
 <body>
+  <div class="login-container">
+    <h2>Login</h2>
 
-    <div class="login-container">
-        <h2>Login</h2>
+    <!-- ✅ Server messages -->
+    <% if (typeof success !== 'undefined' && success) { %>
+      <div class="message success" id="serverSuccess"><%= success %></div>
+    <% } %>
 
-        <% if (success) { %>
-            <div class="message success"><%= success %></div>
-        <% } %>
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="message error" id="serverError"><%= error %></div>
+    <% } %>
 
-        <% if (error) { %>
-            <div class="message error"><%= error %></div>
-        <% } %>
+    <form id="loginForm" action="/login" method="POST" novalidate>
+      <div class="form-group">
+        <label for="email">Email:</label>
+        <input id="email" name="email" type="email" placeholder="Enter email" required>
+        <div class="error-text" id="err-email">Enter a valid email address</div>
+      </div>
 
-        <form action="/login" method="POST">
-            <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="email" name="email" id="email" placeholder="Enter email" required>
-            </div>
-
-            <div class="form-group">
-                <label for="password">Password:</label>
-                <input type="password" name="password" id="password" placeholder="Enter password" required>
-                <div class="show-pass">
-                    <input type="checkbox" id="showPassword"> Show Password
-                </div>
-            </div>
-
-            <button type="submit">SIGN IN</button>
-        </form>
-
-        <div class="links">
-            <p><a href="forgotPassword">forgot-password</a></p>
-            <p>Don't have an account? <a href="/signup">Sign up</a></p>
+      <div class="form-group">
+        <label for="password">Password:</label>
+        <input id="password" name="password" type="password" placeholder="Enter password" required>
+        <div class="error-text" id="err-password">Password must be at least 4 characters</div>
+        
+        <div class="show-pass">
+          <input type="checkbox" id="showPassword"> Show Password
         </div>
+      </div>
+
+      <button type="submit">SIGN IN</button>
+    </form>
+
+    <div class="links">
+      <p><a href="/forgotPassword">Forgot Password?</a></p>
+      <p>Don't have an account? <a href="/signup">Sign up</a></p>
     </div>
+  </div>
 
-    <script>
-        const showPassword = document.getElementById('showPassword');
-        const passwordInput = document.getElementById('password');
-
-        showPassword.addEventListener('change', () => {
-            passwordInput.type = showPassword.checked ? 'text' : 'password';
-        });
-    </script>
+  <script src="/js/login.js" defer></script>
 </body>
 </html>

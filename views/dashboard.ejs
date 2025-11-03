@@ -80,14 +80,12 @@
 </head>
 <body>
   <header>
-   
     <form action="/logout" method="POST">
       <button type="submit" class="logout-btn">Logout</button>
     </form>
   </header>
 
   <div class="container">
-    <!-- Flash Messages -->
     <div class="messages">
       <% if (success) { %>
         <div class="success"><%= success %></div>
@@ -97,14 +95,12 @@
       <% } %>
     </div> 
 
-    <!-- User Info -->
     <% if (user) { %>
       <h2>Welcome, <%= user.name %> 👋</h2>
       <p>You're successfully logged in.</p>
 
       <div class="info-box">
         <h3>Your Profile</h3>
-        
         <p><strong>Email:</strong> <%= user.email %></p>
         <% if (user.role) { %>
           <p><strong>Role:</strong> <%= user.role %></p>
@@ -114,5 +110,17 @@
       <p>No user data found. Please log in again.</p>
     <% } %>
   </div>
+
+  <!-- 🧠 Prevent showing cached dashboard after logout -->
+  <script>
+    window.addEventListener('pageshow', (event) => {
+      if (event.persisted) {
+        window.location.reload(true);
+      }
+    });
+    if (window.performance && window.performance.navigation.type === 2) {
+      window.location.reload(true);
+    }
+  </script>
 </body>
 </html>

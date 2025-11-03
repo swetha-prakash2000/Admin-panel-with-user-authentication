@@ -1,33 +1,38 @@
-const {body,validationResult} = require("express-validator");
+const { body, validationResult } = require("express-validator");
+
+const adminValidator = [
+  body('email')
+    .trim()
+    .notEmpty().withMessage('Email is required')
+    .isEmail().withMessage('Enter a valid email'),
+   
+
+  body('password')
+     .trim()
+     .notEmpty().withMessage('Password is required')
+    .isLength({ min: 4 })
+    .withMessage('Password must be at least 4 characters long'),
+
+  (req, res, next) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      const firstError = errors.array()[0].msg;
+      console.log('Validation error:', errors.array());
+      console.log('Login validator triggered');
+
+      return res.status(400).render('adminlogin', {
+        success: null,
+        error: firstError
+      });
+    }
+
+    next();
+  }
+];
 
 
 
-
-const   adminValidator = [
-
-     body('email').isEmail().withMessage('Error in email'),
-     body('password').isLength({min:4}).withMessage('Error in passwrod'),
-
-     async(req,res,next)=>{
-
-        const error = validationResult(req)
-        if(!error.isEmpty()){
-            req.validationErrors = error.array()
-            // const firstError = error[0]
-            // console.log('first error', firstError);
-            
-            console.log('error in validation',req.validationErrors);
-            
-        }
-        next()
-     }
-
-
-
-
-
-
-]
 
 
 module.exports = {adminValidator}

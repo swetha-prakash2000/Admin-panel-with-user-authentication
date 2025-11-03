@@ -4,34 +4,46 @@
   <meta charset="UTF-8">
   <title>Sign Up | Admin Panel</title>
   <link rel="stylesheet" href="/css/style.css">
+  <style>
+    /* minimal styles for error/success visibility */
+    .alert { padding: 10px; margin-bottom: 12px; border-radius: 4px; }
+    .alert.success { background:#e6ffed; color:#216e3a; border:1px solid #b7f0c6; }
+    .alert.error { background:#ffecec; color:#7a1a1a; border:1px solid #f0c6c6; }
+    .error-text { display:none; color:#b00020; font-size:0.9rem; margin-top:6px; }
+  </style>
 </head>
 <body>
   <div class="container">
     <div class="form-box">
       <h2>Registration</h2>
 
-      <!-- ✅ Success Message -->
+      <!-- server-side success/error (from req.flash or render vars) -->
       <% if (typeof success !== 'undefined' && success) { %>
-        <div class="alert success">
-          <%= success %>
-        </div>
+        <div class="alert success" id="serverSuccess"><%= success %></div>
       <% } %>
 
-      <!-- ❌ Error Message -->
       <% if (typeof error !== 'undefined' && error) { %>
-        <div class="alert error">
-          <%= error %>
-        </div>
+        <div class="alert error" id="serverError"><%= error %></div>
       <% } %>
 
-      <form action="/signup" method="POST">
-        <input type="text" name="name" placeholder="Enter your name" required>
-        <input type="email" name="email" placeholder="Enter your email" required>
-        <input type="password" name="password" placeholder="Create password" required>
-        <input type="password" name="confirmPassword" placeholder="Confirm password" required>
-        
+      <form id="registerForm" action="/signup" method="POST" novalidate>
+        <!-- add matching ids so frontend JS can find them -->
+        <input id="name" name="name" type="text" placeholder="Enter your name" required>
+        <!-- inline error element directly after input -->
+        <div class="error-text" id="err-name">Name is required and must be at least 3 characters</div>
+
+        <input id="email" name="email" type="email" placeholder="Enter your email" required>
+        <div class="error-text" id="err-email">Enter a valid email address</div>
+
+        <input id="password" name="password" type="password" placeholder="Create password" required>
+        <div class="error-text" id="err-password">Password must be at least 5 characters</div>
+
+        <input id="confirmPassword" name="confirmPassword" type="password" placeholder="Confirm password" required>
+        <div class="error-text" id="err-confirmPassword">Passwords do not match</div>
+
         <div class="terms">
-          <input type="checkbox" id="terms" required>
+          <!-- give checkbox a name so server sees it -->
+          <input id="terms" name="terms" type="checkbox" required>
           <label for="terms">I accept all terms & conditions</label>
         </div>
 
@@ -42,8 +54,8 @@
         </p>
       </form>
     </div>
-
-   
   </div>
+
+  <script src="/js/signup.js" defer></script>
 </body>
 </html>

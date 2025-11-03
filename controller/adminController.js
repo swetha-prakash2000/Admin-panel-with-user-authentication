@@ -4,32 +4,36 @@ const User = require('../models/user');
 const jwt = require('jsonwebtoken');
  const bcrypt = require('bcrypt');
 
+
+//----------------------------admin login
+
 async function adminLogin(req, res) {
   const { email, password } = req.body;
   console.log('req.body', req.body);
-  
 
   try {
     const admin = await adminModel.findOne({ email });
 
-
-    if (!admin||password!==admin.password) {
+    if (!admin || password !== admin.password) {
       return res.render('adminLogin', { success: null, error: 'Invalid email or password' });
     }
 
-    
     const token = jwt.sign(
       { id: admin._id, email: admin.email, role: 'admin' },
       process.env.JWT_SECRET,
       { expiresIn: '1d' }
     );
 
+    
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 24 * 60 * 60 * 1000,
+    });
 
- 
-res.cookie('token', token, { httpOnly: true });
-return res.redirect('/adminDashboard');
-
-    //return res.redirect('/adminDashboard');
+    
+    return res.redirect('/adminDashboard');
 
   } catch (error) {
     console.error(error);
@@ -38,27 +42,28 @@ return res.redirect('/adminDashboard');
 }
 
 
-////////admin dashboard
 
+//---------------------------------admin dashboard
 
- async function adminDashboard(req,res) {
+async function adminDashboard(req, res) {
   try {
     
-    const users = await User.find().sort({createdAt : -1})
-    
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
 
-    res.render('adminDashboard',{users , success : null, error : null});
+    const users = await User.find().sort({ createdAt: -1 });
+    res.render('adminDashboard', { users, success: null, error: null });
 
-     
   } catch (error) {
-
     console.error(error);
-    res.render('adminDashboard',{users : [], success : null, error : 'Can not load users'})
-    
+    res.render('adminDashboard', { users: [], success: null, error: 'Cannot load users' });
   }
- }
+}
 
-/////////add user
+
+
+//----------------------------------------add user
 
 
 async function addUser(req, res) {
@@ -66,6 +71,13 @@ async function addUser(req, res) {
     const { user_name, email, password } = req.body;
     console.log('addUser - req.body = ', req.body);
     
+     const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      const users = await User.find();
+      return res.render('adminDashboard', { users, success: null, error: 'User already exists.' });
+    }
+
+
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -75,10 +87,10 @@ async function addUser(req, res) {
       password: hashedPassword
     });
 
-    res.redirect('/adminDashboard');
+    return res.redirect('/adminDashboard');
 
   } catch (error) {
-    console.error(error);
+    console.error('Error adding user',error.message);
     const users = await User.find();
     res.render('adminDashboard', { users, success: null, error: 'Failed to add user. Check all fields.' });
   }
@@ -86,7 +98,7 @@ async function addUser(req, res) {
 
 
 
-///////update user
+//-------------------------------------update user
 
 async function updateUser(req,res) {
 
@@ -94,20 +106,30 @@ async function updateUser(req,res) {
     
 
      const{id, email, password} = req.body
+
+      
+     const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      const users = await User.find();
+      return res.render('adminDashboard', { users, success: null, error: 'User already exists.' });
+    }
+
+
      const hashedPassword = await bcrypt.hash(password,10)
      await User.findByIdAndUpdate(id, {email, password:hashedPassword})
-     res.redirect('/adminDashboard')
+
+     return res.redirect('/adminDashboard')
 
 
   } catch (error) {
-    console.error(error);
+    console.error('Error updating user',error.message);
     const users = await User.find()
     res.render('adminDashboard',{users, success : null, error : null})
 
   }
 }
 
-/////////delete user
+//--------------------------------delete user
 
 async function deleteUser(req,res) {
   
@@ -116,18 +138,18 @@ async function deleteUser(req,res) {
     const{id} = req.body
     await User.findByIdAndDelete(id)
 
-    res.redirect('/adminDashboard')
+   return res.redirect('/adminDashboard')
 
 
   } catch (error) {
-    console.error(error)
+    console.error('Error deleting user',error.message)
     const users = await User.find();
     res.render('adminDashboard',{users , success : null, error : null})
   }
 }
 
 
-//////////block
+//------------------------------------block
 
 async function blockUser(req,res) {
 
@@ -142,31 +164,38 @@ async function blockUser(req,res) {
     }
     const users = await User.find();
 
-     res.render('adminDashboard',{users, success : null , error : null})
+    return res.render('adminDashboard',{users, success : null , error : null})
      
-    // res.redirect('/adminDashboard')
+   
 
   } catch (error) {
     
     console.error(error)
     const users = await User.find();
-    res.render('adminDashboard',{users, success : null , error : error})
+   return res.render('adminDashboard',{users, success : null , error : error})
   }
   
 }
 
 
-///////logout
+//-------------------------------logout
+
 
 
 
 
 const logoutAdmin = (req, res) => {
-  res.clearCookie('token')
-  res.redirect('/adminLogin')
-}
+  res.clearCookie('token', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    path: '/',
+  });
+  
+  res.cookie('token', '', { expires: new Date(0), path: '/' });
 
-
+  res.redirect('/adminLogin');
+};
 
 
 

@@ -6,7 +6,8 @@ const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer")
 
 
-//signup
+//----------------------------------signup
+
 async function postSignup(req, res) {
   try {
     const { name, email, password, confirmPassword } = req.body;
@@ -40,66 +41,74 @@ async function postSignup(req, res) {
 }
 
 
-//login
+//---------------------------------------login
 
-
-async function postLogin(req,res) {
+async function postLogin(req, res) {
   try {
-    console.log('login worked in controller')
-    const{email,password} = req.body;
-   
-   
-    const user = await User.findOne({email});
-   if(!user){
-    return res.render('login',{success : null, error : 'User does not exist'})
-   }
-   if(user.isBlock){
-    return res.render('login',{success : null, error : 'You are blocked by admiin'})
-   }
-   
-    const isMatch = await bcrypt.compare(password,user.password)
+    console.log('login worked in controller');
+    const { email, password } = req.body;
 
-    if(!isMatch){
-      return res.render('login',{success : null, error : 'Invalid password'})
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.render('login', { success: null, error: 'User does not exist' });
+    }
+    if (user.isBlock) {
+      return res.render('login', { success: null, error: 'You are blocked by admin' });
     }
 
-  const token = jwt.sign({id:user._id,email : user.email},process.env.JWT_SECRET,{expiresIn:'1d'})
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.render('login', { success: null, error: 'Invalid password' });
+    }
 
-   res.cookie('token',token,{
-    httpOnly : true,
-    maxAge:24*60*60*1000
-   })
+    const token = jwt.sign(
+      { id: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' }
+    );
 
-   res.render('dashboard',{user: user,success : null, error : null})
-    // res.redirect('/dashboard');
-    
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', 
+      sameSite: 'strict',
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
+   
+    return res.redirect('/dashboard');
 
   } catch (error) {
-    console.log('error from postLogin',error.message,error.stack);
-   
+    console.log('error from postLogin', error.message, error.stack);
+    return res.render('login', { success: null, error: 'Error during login' });
+  }
+}
+
+//---------------------------------dashboard
+
+ 
+async function Dashboard(req, res) {
+  try {
     
-    return res.render('login',{success : null, error :'Error during login'})
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+
+    const user = await User.findById(req.auth.id);
+    if (!user) {
+      return res.redirect('/login');
+    }
+
+    return res.render('dashboard', { user, success: null, error: null });
+  } catch (error) {
+    console.error('Error loading dashboard', error);
+    return res.redirect('/login');
   }
-  
 }
 
 
-////dashboard
-async function Dashboard(req,res) {
-  const user = await User.findById(req.auth._id)
-
-  
-  if(!user){
-    return res.redirect('/login')
-   
-  }
-
-  return res.render('dashboard',{user, success : null, error : null})
-}
 
 
-
-////forgot password
+//-----------------------------forgot password
 
 async function forgotPassword(req, res) {
   const { email } = req.body;
@@ -153,17 +162,17 @@ async function forgotPassword(req, res) {
     });
   } catch (error) {
     console.error(" Error forgot password:", error.message,error.stack);
-    res.render("verify", { success: null, error: "Failed to send OTP. Try again later." });
+    res.render("forgotPassword", { success: null, error: "Failed to send OTP. Try again later." });
   }
 }
 
 
-/////verify otp
+//-------------------------------verify otp
 
 
 async function verify(req, res) {
   const { email, digit1, digit2, digit3, digit4, digit5, digit6 ,} = req.body;
-  // console.log('verify - req.body = ', req.body);
+  
   
   const otpJoin = `${digit1}${digit2}${digit3}${digit4}${digit5}${digit6}`;
 
@@ -200,7 +209,7 @@ async function verify(req, res) {
 }
 
 
-////////reset password
+//-----------------------------reset password
 
   
 async function resetPassword(req, res) {
@@ -210,8 +219,7 @@ async function resetPassword(req, res) {
 console.log(' restPassword - req body =', req.body);
 
   try {
-    // const userNew = await User.findOne({user : email.id})
-    // console.log('restPassword', userNew);
+    
     
     if (password !== confirmPassword) {
       return res.render('resetPassword', {
@@ -263,14 +271,25 @@ console.log(' restPassword - req body =', req.body);
 
 
 
-///////user logout
+//----------------user logout
 
- const logout =async (req,res)=>{
-  await res.clearCookie('token')
-  res.redirect('/login')
+
+
+ 
+
+const logout = async (req, res) => {
+  res.clearCookie('token', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    path: '/', 
+  });
+
   
-}
+  res.cookie('token', '', { expires: new Date(0), path: '/' });
 
+  res.redirect('/login');
+};
 
 
 
